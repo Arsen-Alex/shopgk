@@ -1,22 +1,24 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
+  <h2>Товары</h2>
 
-
-<h2>Товары</h2>
-
-
-{% for product in products %}
-    <div>
-        <h3>{{ product.name }}</h3>
-        <p>{{ product.description }}</p>
-        <b>{{ product.price }} ₸</b>
-    </div>  
-    <hr>
-{% empty %}
-    <p>Товаров пока нет</p>
-{% endfor %}
-
-
+  <div class="row">
+    {% for product in products %}
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
+                </h5>
+                <p class="card-text">{{ product.description }} ₸</p>
+                <b>Цена: {{ product.price }} ₸</b>
+            </div>
+        </div>
+      </div>
+      <hr />
+    {% empty %}
+      <p>Товаров пока нет</p>
+    {% endfor %}
+  </div>
 {% endblock %}

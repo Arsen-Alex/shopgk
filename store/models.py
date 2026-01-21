@@ -9,5 +9,5 @@ class Product(models.Model):
     description = models.TextField(blank=True) # описание (необязательно)
 
 
-def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
