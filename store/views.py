@@ -32,7 +32,7 @@ def logout_view(request):
     return redirect('login')
 
 def product_list(request):
-    products = Product.objects.all() # берём все товары
+    products = Product.objects.all()
     return render(request, 'store/product_list.html', {
     'products': products
     })
