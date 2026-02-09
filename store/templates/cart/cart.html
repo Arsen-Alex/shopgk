@@ -1,54 +1,40 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Корзина</title>
+{% extends "base.html" %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-
+{% block content %}
 <div class="container py-5">
     <h1 class="mb-4">🛒 Корзина</h1>
 
-    {% if cart_items %}
+    {% if items %}
         <div class="table-responsive">
             <table class="table align-middle">
                 <thead class="table-light">
                     <tr>
                         <th>Товар</th>
                         <th>Цена</th>
-                        <th class="text-center">Количество</th>
-                        <th>Сумма</th>
+                        <th>Количество</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                {% for item in cart_items %}
+                {% for item in items %}
                     <tr>
                         <td>
                             <strong>{{ item.product.name }}</strong><br>
                             <small class="text-muted">{{ item.product.description|truncatechars:50 }}</small>
                         </td>
                         <td>{{ item.product.price }} ₸</td>
-                        <td class="text-center">
-                            <form method="post" action="{% url 'cart_update' item.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <input type="number"
-                                       name="quantity"
-                                       value="{{ item.quantity }}"
-                                       min="1"
-                                       class="form-control form-control-sm text-center"
-                                       style="width: 80px;">
-                            </form>
+                        <td class="text-flex gap-2">
+                            {{ item.quantity }} шт.
+                            <a href="{% url 'update_cart_item' item.product.id %}?action=inc" class="btn btnsm btn-success">+</a>
+                            <a href="{% url 'update_cart_item' item.product.id %}?action=dec" class="btn btnsm btn-warning">-</a>
                         </td>
-                        <td>{{ item.total_price }} ₸</td>
                         <td class="text-end">
-                            <a href="{% url 'cart_remove' item.id %}"
-                               class="btn btn-outline-danger btn-sm">
-                                ✕
-                            </a>
+                            <form method="post" action="{% url 'remove_from_cart' item.product.id %}">
+                               {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    ✕
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 {% endfor %}
@@ -60,14 +46,14 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Итого</h5>
-                        <p class="d-flex justify-content-between">
-                            <span>Товары:</span>
-                            <strong>{{ cart_total }} ₸</strong>
+                        <h5 class="card-title">Итоговая сумма:</h5>
+                            <strong>{{ total_price }} ₸</strong>
                         </p>
-                        <a href="{% url 'checkout' %}" class="btn btn-primary w-100">
+                        {% for item in items %}
+                        <a href="{% url 'create_payment' item.product.id %}" class="btn btn-primary w-100">
                             Оформить заказ
                         </a>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -82,7 +68,4 @@
         </a>
     {% endif %}
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}

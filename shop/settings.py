@@ -124,3 +124,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+YOOKASSA_SHOP_ID = '1271846'
+YOOKASSA_SHOP_KEY = 'test_tz0trZTgh2UfurUCvQqPgrq0O33dFtQ1N7cJxeQalIM'

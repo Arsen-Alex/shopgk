@@ -4,12 +4,13 @@ from django.contrib.auth.forms import AuthenticationForm
 
 
 class RegisterForm(forms.ModelForm):
+    username = forms.CharField(
+        label="Имя пользователя:",
+        widget=forms.TextInput,
+    )
     email = forms.EmailField(
         label="Электронная почта:",
         widget=forms.EmailInput,
-        error_messages={
-            "invalid": "Введите корректный электронный адрес.",
-        }
     )
     password1 = forms.CharField(
         label="Пароль:",
@@ -23,10 +24,13 @@ class RegisterForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username']
-        help_texts = {
-            'username': None,
-        }
 
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Это имя пользователя уже используется.")
+        return username
+    
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
