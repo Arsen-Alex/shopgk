@@ -49,11 +49,9 @@
                         <h5 class="card-title">Итоговая сумма:</h5>
                             <strong>{{ total_price }} ₸</strong>
                         </p>
-                        {% for item in items %}
-                        <a href="{% url 'create_payment' item.product.id %}" class="btn btn-primary w-100">
+                        <a href="{% url 'create_payment' items.0.product.id %}" class="btn btn-primary w-100">
                             Оформить заказ
                         </a>
-                        {% endfor %}
                     </div>
                 </div>
             </div>

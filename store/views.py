@@ -2,11 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import RegisterForm, LoginForm
-from .models import Product, Order
-from .Cart import Cart, CartItem
+from .models import Product, Order, Cart, CartItem
 from yookassa import Configuration, Payment
 from django.conf import settings
 import uuid
+from django.http import JsonResponse
 
 Configuration.account_id = settings.YOOKASSA_SHOP_ID
 Configuration.secret_key = settings.YOOKASSA_SHOP_KEY
@@ -37,6 +37,8 @@ def create_payment(request, product_id):
     return redirect(payment.confirmation.confirmation_url)
 
 def payment_success(request):
+    cart = Cart.objects.get(user=request.user)
+    cart.items.all().delete()
     return render(request, "payment_success.html")
 
 def register_view(request):
@@ -110,20 +112,26 @@ def view_cart(request):
 @login_required
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-
     cart, _ = Cart.objects.get_or_create(user=request.user)
 
     cart_item, created = CartItem.objects.get_or_create(
         cart=cart,
-        product=product,
-        defaults={"quantity": 1}
+        product=product
     )
 
     if not created:
         cart_item.quantity += 1
         cart_item.save()
 
-    return redirect("view_cart")
+    # считаем общее количество товаров в корзине
+    cart_count = sum(item.quantity for item in cart.items.all())
+
+    # проверяем, пришёл ли AJAX-запрос
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'cart_count': cart_count})
+    
+    # обычный POST — редирект на страницу корзины
+    return redirect('view_cart')
 
 @login_required
 def remove_from_cart(request, product_id):
@@ -160,3 +168,7 @@ def update_cart_item(request, product_id):
             item.save()
 
     return redirect("view_cart")
+
+def orders_list(request):
+    orders = Order.objects.all()
+    return render(request, "store/orders.html", {"orders": orders})

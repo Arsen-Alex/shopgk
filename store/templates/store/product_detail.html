@@ -1,10 +1,64 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Детали товара</h2>
-<div>
-    <h3>{{ product.name }}</h3>
-    <p> Phone — это линейка смартфонов Apple, отличающаяся премиальным дизайном (стекло, металл), мощными процессорами Apple, яркими OLED-экранами (Super Retina XDR) и передовыми камерами с умной обработкой, работающих под управлением iOS и использующих порт USB-C (на новых моделях), с функциями как True Tone, Dynamic Island и продвинутыми системами безопасности и конфиденциальности. </p>
-    <b>Цена: {{ product.price }} ₸</b>
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="card-title mb-3">{{ product.name }}</h2>
+
+          <p class="card-text text-muted">
+            {{ product.description }}
+          </p>
+
+          <h4 class="mb-4">
+            Цена: <span class="text-success">{{ product.price }} тг.</span>
+          </h4>
+
+          <!-- Форма оставляем для работы без JS -->
+          <form method="post" action="{% url 'add_to_cart' product.id %}" class="d-flex gap-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary add-to-cart" data-id="{{ product.id }}">
+              🛒 Добавить в корзину
+            </button>
+            <a href="{% url 'view_cart' %}" class="btn btn-primary">Перейти в корзину</a>
+            <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">← Назад</a>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault(); // предотвращаем обычный POST
+
+            const productId = this.dataset.id;
+
+            fetch(/add-to-cart/${productId}/, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // обновляем цифру в navbar
+                document.getElementById('cart-count').textContent = data.cart_count;
+            })
+            .catch(error => console.error('Ошибка при добавлении в корзину:', error));
+        });
+    });
+});
+</script>
 {% endblock %}
